@@ -18,6 +18,56 @@ function hide(el) {
   el.classList.add("hidden");
 }
 
+const DRAFT_KEY = "tracrDraft";
+const DRAFT_FIELD_IDS = [
+  "field-jobUrl",
+  "field-jobTitle",
+  "field-companyName",
+  "field-description",
+  "field-location",
+  "field-jobType",
+  "field-salaryCurrency",
+  "field-salaryPeriod",
+  "field-salaryMin",
+  "field-salaryMax",
+  "field-status",
+  "field-dateApplied",
+  "field-contactPerson",
+  "field-contactEmail",
+  "field-notes",
+];
+
+let draftSaveTimeout = null;
+
+function saveDraft() {
+  clearTimeout(draftSaveTimeout);
+  draftSaveTimeout = setTimeout(async () => {
+    const draft = {};
+    for (const id of DRAFT_FIELD_IDS) {
+      draft[id] = document.getElementById(id).value;
+    }
+    await chrome.storage.local.set({ [DRAFT_KEY]: draft });
+  }, 300);
+}
+
+async function loadDraft() {
+  const result = await chrome.storage.local.get(DRAFT_KEY);
+  return result[DRAFT_KEY] ?? null;
+}
+
+async function clearDraft() {
+  clearTimeout(draftSaveTimeout);
+  await chrome.storage.local.remove(DRAFT_KEY);
+}
+
+function applyDraft(draft) {
+  for (const id of DRAFT_FIELD_IDS) {
+    if (draft[id] !== undefined) {
+      document.getElementById(id).value = draft[id];
+    }
+  }
+}
+
 async function getToken() {
   const { tracrToken } = await chrome.storage.local.get("tracrToken");
   return tracrToken ?? null;
@@ -38,10 +88,18 @@ function requireReconnect() {
 
 async function init() {
   const token = await getToken();
-  if (token) {
-    show(mainScreen);
-  } else {
+  if (!token) {
     show(connectScreen);
+    return;
+  }
+
+  show(mainScreen);
+
+  const draft = await loadDraft();
+  if (draft) {
+    applyDraft(draft);
+    hide(actionsRow);
+    show(reviewForm);
   }
 }
 
@@ -100,10 +158,13 @@ addButton.addEventListener("click", async () => {
   show(reviewForm);
 });
 
-cancelAdd.addEventListener("click", () => {
+reviewForm.addEventListener("input", saveDraft);
+
+cancelAdd.addEventListener("click", async () => {
   hide(reviewForm);
   reviewForm.reset();
   show(actionsRow);
+  await clearDraft();
 });
 
 reviewForm.addEventListener("submit", async (event) => {
@@ -161,6 +222,7 @@ reviewForm.addEventListener("submit", async (event) => {
     hide(reviewForm);
     reviewForm.reset();
     show(actionsRow);
+    await clearDraft();
     addStatus.textContent = "Saved to Tracr.";
     show(addStatus);
   } catch {
