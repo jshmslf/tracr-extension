@@ -17,5 +17,5 @@
     "128": "icons/icon128.png"
   },
   "permissions": ["storage", "tabs"],
-  "host_permissions": ["http://localhost:3000/*", "https://*.tracr.app/*"]
+  "host_permissions": ["http://localhost:3000/*", "https://tracr-web.vercel.app/*"]
 }
