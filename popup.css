@@ -14,7 +14,9 @@
 }
 
 body {
-  width: 320px;
+  width: 360px;
+  max-height: 560px;
+  overflow-y: auto;
   margin: 0;
   padding: 16px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
@@ -60,7 +62,8 @@ body {
 }
 
 textarea,
-input {
+input,
+select {
   width: 100%;
   padding: 8px;
   border: 1px solid var(--border);
@@ -72,7 +75,8 @@ input {
 }
 
 textarea:focus,
-input:focus {
+input:focus,
+select:focus {
   outline: none;
   border-color: var(--primary);
 }
@@ -152,4 +156,10 @@ button:disabled {
   gap: 10px;
   border-top: 1px solid var(--border);
   padding-top: 10px;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }

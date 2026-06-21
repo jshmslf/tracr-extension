@@ -3,10 +3,10 @@ const mainScreen = document.getElementById("main-screen");
 const phraseInput = document.getElementById("phrase-input");
 const connectButton = document.getElementById("connect-button");
 const connectError = document.getElementById("connect-error");
+const actionsRow = document.getElementById("actions-row");
 const addButton = document.getElementById("add-button");
 const dashboardButton = document.getElementById("dashboard-button");
 const reviewForm = document.getElementById("review-form");
-const addWarning = document.getElementById("add-warning");
 const cancelAdd = document.getElementById("cancel-add");
 const addStatus = document.getElementById("add-status");
 const disconnectButton = document.getElementById("disconnect-button");
@@ -29,6 +29,11 @@ async function setToken(token) {
 
 async function clearToken() {
   await chrome.storage.local.remove("tracrToken");
+}
+
+function requireReconnect() {
+  hide(mainScreen);
+  show(connectScreen);
 }
 
 async function init() {
@@ -63,6 +68,7 @@ connectButton.addEventListener("click", async () => {
     }
 
     await setToken(data.token);
+    phraseInput.value = "";
     hide(connectScreen);
     show(mainScreen);
   } catch {
@@ -78,94 +84,71 @@ dashboardButton.addEventListener("click", () => {
   chrome.tabs.create({ url: `${TRACR_ORIGIN}/applications` });
 });
 
-let currentUrl = "";
-
 addButton.addEventListener("click", async () => {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab?.url) return;
-  currentUrl = tab.url;
-
   const token = await getToken();
   if (!token) {
     await clearToken();
-    hide(mainScreen);
-    show(connectScreen);
+    requireReconnect();
     return;
   }
 
-  addButton.disabled = true;
-  addButton.textContent = "Reading page...";
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  document.getElementById("field-jobUrl").value = tab?.url ?? "";
+
+  hide(actionsRow);
   hide(addStatus);
-
-  try {
-    const response = await fetch(`${TRACR_ORIGIN}/api/extension/scrape`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ url: currentUrl }),
-    });
-
-    if (response.status === 401) {
-      await clearToken();
-      hide(mainScreen);
-      show(connectScreen);
-      return;
-    }
-
-    const result = await response.json();
-
-    document.getElementById("field-jobTitle").value = result.jobTitle ?? "";
-    document.getElementById("field-companyName").value = result.companyName ?? "";
-    document.getElementById("field-location").value = result.location ?? "";
-
-    if (result.warnings?.length) {
-      addWarning.textContent = result.warnings.join(" ");
-      show(addWarning);
-    } else {
-      hide(addWarning);
-    }
-
-    show(reviewForm);
-  } catch {
-    addStatus.textContent = "Could not read this page. Try again.";
-    show(addStatus);
-  } finally {
-    addButton.disabled = false;
-    addButton.textContent = "Add this page";
-  }
+  show(reviewForm);
 });
 
 cancelAdd.addEventListener("click", () => {
   hide(reviewForm);
   reviewForm.reset();
+  show(actionsRow);
 });
 
 reviewForm.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const token = await getToken();
-  if (!token) return;
+  if (!token) {
+    requireReconnect();
+    return;
+  }
 
   const submitButton = reviewForm.querySelector('button[type="submit"]');
   submitButton.disabled = true;
   submitButton.textContent = "Saving...";
 
+  const field = (id) => document.getElementById(id).value.trim();
+
+  const payload = {
+    jobUrl: field("field-jobUrl"),
+    jobTitle: field("field-jobTitle"),
+    companyName: field("field-companyName"),
+    description: field("field-description"),
+    location: field("field-location"),
+    jobType: field("field-jobType") || undefined,
+    salaryCurrency: field("field-salaryCurrency"),
+    salaryPeriod: field("field-salaryPeriod") || undefined,
+    salaryMin: field("field-salaryMin") ? Number(field("field-salaryMin")) : undefined,
+    salaryMax: field("field-salaryMax") ? Number(field("field-salaryMax")) : undefined,
+    status: field("field-status"),
+    dateApplied: field("field-dateApplied") || undefined,
+    contactPerson: field("field-contactPerson"),
+    contactEmail: field("field-contactEmail"),
+    notes: field("field-notes"),
+  };
+
   try {
     const response = await fetch(`${TRACR_ORIGIN}/api/extension/applications`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({
-        jobTitle: document.getElementById("field-jobTitle").value,
-        companyName: document.getElementById("field-companyName").value,
-        location: document.getElementById("field-location").value,
-        jobUrl: currentUrl,
-        status: "saved",
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (response.status === 401) {
       await clearToken();
-      hide(mainScreen);
-      show(connectScreen);
+      requireReconnect();
       return;
     }
 
@@ -177,7 +160,11 @@ reviewForm.addEventListener("submit", async (event) => {
 
     hide(reviewForm);
     reviewForm.reset();
+    show(actionsRow);
     addStatus.textContent = "Saved to Tracr.";
+    show(addStatus);
+  } catch {
+    addStatus.textContent = "Could not reach Tracr. Check your connection.";
     show(addStatus);
   } finally {
     submitButton.disabled = false;
@@ -187,8 +174,7 @@ reviewForm.addEventListener("submit", async (event) => {
 
 disconnectButton.addEventListener("click", async () => {
   await clearToken();
-  hide(mainScreen);
-  show(connectScreen);
+  requireReconnect();
 });
 
 init();

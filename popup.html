@@ -19,14 +19,73 @@
     </section>
 
     <section id="main-screen" class="screen hidden">
-      <button id="add-button" class="primary">Add this page</button>
-      <button id="dashboard-button" class="secondary">View dashboard</button>
+      <div id="actions-row" class="row">
+        <button id="add-button" class="primary">Add application</button>
+        <button id="dashboard-button" class="secondary">View dashboard</button>
+      </div>
 
       <form id="review-form" class="review-form hidden">
+        <label>Job posting link<input id="field-jobUrl" type="url" /></label>
         <label>Job title<input id="field-jobTitle" required /></label>
         <label>Company<input id="field-companyName" required /></label>
+        <label>Description<textarea id="field-description" rows="3"></textarea></label>
         <label>Location<input id="field-location" /></label>
-        <p id="add-warning" class="hint hidden"></p>
+        <label>
+          Job type
+          <select id="field-jobType">
+            <option value="">Not specified</option>
+            <option value="remote">Remote</option>
+            <option value="hybrid">Hybrid</option>
+            <option value="onsite">Onsite</option>
+          </select>
+        </label>
+
+        <div class="field-grid">
+          <label>
+            Currency
+            <select id="field-salaryCurrency">
+              <option value="PHP">PHP</option>
+              <option value="USD">USD</option>
+              <option value="SGD">SGD</option>
+              <option value="AUD">AUD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+              <option value="JPY">JPY</option>
+              <option value="HKD">HKD</option>
+              <option value="CAD">CAD</option>
+            </select>
+          </label>
+          <label>
+            Pay period
+            <select id="field-salaryPeriod">
+              <option value="">Not specified</option>
+              <option value="hourly">Hourly</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </label>
+        </div>
+        <div class="field-grid">
+          <label>Salary min<input id="field-salaryMin" type="number" min="0" /></label>
+          <label>Salary max<input id="field-salaryMax" type="number" min="0" /></label>
+        </div>
+
+        <label>
+          Status
+          <select id="field-status">
+            <option value="saved">Saved</option>
+            <option value="applied">Applied</option>
+            <option value="interviewing">Interviewing</option>
+            <option value="offer">Offer</option>
+            <option value="rejected">Rejected</option>
+            <option value="withdrawn">Withdrawn</option>
+          </select>
+        </label>
+        <label>Date applied<input id="field-dateApplied" type="date" /></label>
+        <label>Contact person<input id="field-contactPerson" /></label>
+        <label>Contact email<input id="field-contactEmail" type="email" /></label>
+        <label>Notes<textarea id="field-notes" rows="2"></textarea></label>
+
         <div class="row">
           <button type="submit" class="primary">Save</button>
           <button type="button" id="cancel-add" class="secondary">Cancel</button>
