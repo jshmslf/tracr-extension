@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Tracr</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="header">
+      <img src="icons/icon48.png" alt="" class="logo" />
+      <span class="brand">Tracr</span>
+    </header>
+
+    <section id="connect-screen" class="screen hidden">
+      <p class="hint">Paste the 12-word pairing phrase from your Tracr profile page.</p>
+      <textarea id="phrase-input" rows="3" placeholder="word word word ..."></textarea>
+      <button id="connect-button" class="primary">Connect</button>
+      <p id="connect-error" class="error hidden"></p>
+    </section>
+
+    <section id="main-screen" class="screen hidden">
+      <button id="add-button" class="primary">Add this page</button>
+      <button id="dashboard-button" class="secondary">View dashboard</button>
+
+      <form id="review-form" class="review-form hidden">
+        <label>Job title<input id="field-jobTitle" required /></label>
+        <label>Company<input id="field-companyName" required /></label>
+        <label>Location<input id="field-location" /></label>
+        <p id="add-warning" class="hint hidden"></p>
+        <div class="row">
+          <button type="submit" class="primary">Save</button>
+          <button type="button" id="cancel-add" class="secondary">Cancel</button>
+        </div>
+      </form>
+
+      <p id="add-status" class="status hidden"></p>
+      <button id="disconnect-button" class="link">Disconnect this device</button>
+    </section>
+
+    <script src="config.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
