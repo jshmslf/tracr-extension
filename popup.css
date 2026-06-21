@@ -72,6 +72,7 @@ select {
   font-size: 13px;
   background: var(--background);
   color: var(--foreground);
+  resize: vertical;
 }
 
 textarea:focus,
@@ -79,6 +80,37 @@ input:focus,
 select:focus {
   outline: none;
   border-color: var(--primary);
+}
+
+.rich-input {
+  width: 100%;
+  min-height: 80px;
+  max-height: 220px;
+  overflow-y: auto;
+  resize: vertical;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.rich-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.rich-input a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.rich-input ul,
+.rich-input ol {
+  margin: 4px 0;
+  padding-left: 20px;
 }
 
 label {

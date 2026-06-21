@@ -39,12 +39,26 @@ const DRAFT_FIELD_IDS = [
 
 let draftSaveTimeout = null;
 
+function getFieldValue(id) {
+  const el = document.getElementById(id);
+  return id === "field-description" ? el.innerHTML : el.value;
+}
+
+function setFieldValue(id, value) {
+  const el = document.getElementById(id);
+  if (id === "field-description") {
+    el.innerHTML = value ?? "";
+  } else {
+    el.value = value ?? "";
+  }
+}
+
 function saveDraft() {
   clearTimeout(draftSaveTimeout);
   draftSaveTimeout = setTimeout(async () => {
     const draft = {};
     for (const id of DRAFT_FIELD_IDS) {
-      draft[id] = document.getElementById(id).value;
+      draft[id] = getFieldValue(id);
     }
     await chrome.storage.local.set({ [DRAFT_KEY]: draft });
   }, 300);
@@ -63,9 +77,14 @@ async function clearDraft() {
 function applyDraft(draft) {
   for (const id of DRAFT_FIELD_IDS) {
     if (draft[id] !== undefined) {
-      document.getElementById(id).value = draft[id];
+      setFieldValue(id, draft[id]);
     }
   }
+}
+
+function resetReviewForm() {
+  reviewForm.reset();
+  document.getElementById("field-description").innerHTML = "";
 }
 
 async function getToken() {
@@ -162,7 +181,7 @@ reviewForm.addEventListener("input", saveDraft);
 
 cancelAdd.addEventListener("click", async () => {
   hide(reviewForm);
-  reviewForm.reset();
+  resetReviewForm();
   show(actionsRow);
   await clearDraft();
 });
@@ -186,7 +205,7 @@ reviewForm.addEventListener("submit", async (event) => {
     jobUrl: field("field-jobUrl"),
     jobTitle: field("field-jobTitle"),
     companyName: field("field-companyName"),
-    description: field("field-description"),
+    description: getFieldValue("field-description").trim(),
     location: field("field-location"),
     jobType: field("field-jobType") || undefined,
     salaryCurrency: field("field-salaryCurrency"),
@@ -220,7 +239,7 @@ reviewForm.addEventListener("submit", async (event) => {
     }
 
     hide(reviewForm);
-    reviewForm.reset();
+    resetReviewForm();
     show(actionsRow);
     await clearDraft();
     addStatus.textContent = "Saved to Tracr.";
