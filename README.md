@@ -1,6 +1,11 @@
 # Tracr Extension
 
-Chrome/Edge (Manifest V3) extension for adding job applications to [Tracr](https://github.com) directly from any job posting page.
+Chrome/Edge (Manifest V3) extension for adding job applications to [Tracr](https://github.com/jshmslf/tracr) directly from any job posting page.
+
+## Links
+
+- Repo: https://github.com/jshmslf/tracr
+- Live app: https://tracr.vercel.app
 
 ## Load it locally
 
